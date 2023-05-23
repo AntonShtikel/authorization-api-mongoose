@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './user.schema';
 import { UserDto } from './dto/user.dto';
+import Redis from 'ioredis';
 
 @Injectable()
 export class UserService {
@@ -20,7 +21,7 @@ export class UserService {
     return new this.userModel(userDto).save();
   }
 
-  async userLogin(@Body() userDto: UserDto): Promise<string> {
+  async userLogin(@Body() userDto: UserDto): Promise<any> {
     const existingUser = await this.userModel.findOne({ name: userDto.name });
     const passwordCheck = await bcrypt.compare(
       userDto.password,
@@ -30,7 +31,15 @@ export class UserService {
       // if name or password do not match -> error message
       return 'Wrong data(';
     }
-    // if credential exist in db -> return message of success
-    return 'You logged in!';
+    const redis = new Redis({
+      host: 'redis',
+      port: 6379,
+    });
+    const request = [];
+    for (let i = 0; i < 10; i++) {
+      const randomNumber = Math.floor(Math.random() * 50) + 1;
+      request[i] = await redis.get(randomNumber.toString());
+    }
+    return request;
   }
 }
