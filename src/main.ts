@@ -2,10 +2,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import Redis from 'ioredis';
 import * as fs from 'fs';
-
+import * as process from 'process';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(3003);
+  await app.listen(process.env.PORT || 5001);
 
   const redis = new Redis({
     host: 'redis',

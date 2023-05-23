@@ -12,7 +12,7 @@ export class UserService {
 
   async userRegistration(@Body() userDto: UserDto): Promise<User> {
     // function of registration user
-    const existingUser = await this.userModel.findOne({ name: userDto.name });
+    const existingUser = await this.userModel.findOne({ login: userDto.login });
     if (existingUser) {
       throw new Error('User exist! please authorize!');
     }
@@ -22,7 +22,7 @@ export class UserService {
   }
 
   async userLogin(@Body() userDto: UserDto): Promise<any> {
-    const existingUser = await this.userModel.findOne({ name: userDto.name });
+    const existingUser = await this.userModel.findOne({ login: userDto.login });
     const passwordCheck = await bcrypt.compare(
       userDto.password,
       existingUser.password,

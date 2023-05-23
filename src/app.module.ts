@@ -1,15 +1,10 @@
 import { Module } from '@nestjs/common';
 import { UserModule } from './authorization/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { RedisModule } from 'nestjs-redis';
+import * as process from 'process';
 
 @Module({
-  imports: [
-    UserModule,
-    MongooseModule.forRoot(
-      `mongodb+srv://shtikelanton:1234@cluster0.o4cfyoc.mongodb.net/`,
-    ),
-  ],
+  imports: [UserModule, MongooseModule.forRoot(process.env.MONGOOSE_URL)],
   controllers: [],
   providers: [],
 })
