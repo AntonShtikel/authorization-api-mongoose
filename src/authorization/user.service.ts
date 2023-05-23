@@ -1,29 +1,36 @@
 import { Body, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from './user.schema';
+import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
+import { User, UserDocument } from './user.schema';
 import { UserDto } from './dto/user.dto';
+
 @Injectable()
-export class AuthorizationService {
+export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async userRegistration(@Body() userDto: UserDto): Promise<UserDocument> {
+  async userRegistration(@Body() userDto: UserDto): Promise<User> {
     // function of registration user
     const existingUser = await this.userModel.findOne({ name: userDto.name });
     if (existingUser) {
       throw new Error('User exist! please authorize!');
     }
+    userDto.password = await bcrypt.hash(userDto.password, 3);
     // if credential are not exist in db -> save new user in db
     return new this.userModel(userDto).save();
   }
 
   async userLogin(@Body() userDto: UserDto): Promise<string> {
-    // function of login user
-    const existingUser = await this.userModel.findOne(userDto);
-    if (existingUser) {
-      // if credential exist in db -> return message of success
-      return 'You are in system!';
+    const existingUser = await this.userModel.findOne({ name: userDto.name });
+    const passwordCheck = await bcrypt.compare(
+      userDto.password,
+      existingUser.password,
+    );
+    if (!existingUser || !passwordCheck) {
+      // if name or password do not match -> error message
+      return 'Wrong data(';
     }
-    return 'Wrong data(';
+    // if credential exist in db -> return message of success
+    return 'You logged in!';
   }
 }
